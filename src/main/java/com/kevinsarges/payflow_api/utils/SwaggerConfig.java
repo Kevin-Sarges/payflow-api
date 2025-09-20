@@ -13,7 +13,9 @@ public class SwaggerConfig {
                 new Info()
                         .title("Payflow API")
                         .version("1.0")
-                        .description("Api feita para o teste técnico da SEFA - FADESP")
+                        .description("Api feita para o teste técnico da SEFA - FADESP. " +
+                                "Se necessário de uma olhada no README do projeto para entende como " +
+                                "funciona as rotas")
         );
     }
 }
