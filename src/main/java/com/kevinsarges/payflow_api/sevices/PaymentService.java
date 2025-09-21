@@ -1,5 +1,7 @@
 package com.kevinsarges.payflow_api.sevices;
 
+import com.kevinsarges.payflow_api.DTOs.DeletePaymentResponseDTO;
+import com.kevinsarges.payflow_api.DTOs.PaymentRequestDTO;
 import com.kevinsarges.payflow_api.entities.Payment;
 import com.kevinsarges.payflow_api.entities.PaymentMethod;
 import com.kevinsarges.payflow_api.entities.PaymentStatus;
@@ -12,20 +14,36 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigInteger;
-import java.util.List;
+import java.time.LocalDateTime;
 
 @Service
 @RequiredArgsConstructor
 public class PaymentService {
     private final PaymentRepository repository;
 
-    public Payment create(Payment pay) {
+    @Transactional
+    public Payment create(PaymentRequestDTO dto) {
+        PaymentMethod method;
+
+        try {
+            method = PaymentMethod.valueOf(dto.getMetodo().toUpperCase());
+        } catch (IllegalArgumentException e) {
+            throw new BusinessException("Método de pagamento inválido: " + dto.getMetodo());
+        }
+
+        Payment pay = new Payment();
+        pay.setCodigoDebito(dto.getCodigoDebito());
+        pay.setCpfCnpj(dto.getCpfCnpj());
+        pay.setMetodo(method);
+        pay.setNumeroCartao(dto.getNumeroCartao());
+        pay.setValor(dto.getValor());
+        pay.setStatus(PaymentStatus.PENDENTE_PROCESSAMENTO);
+
         if((pay.getMetodo() == PaymentMethod.CREDITO || pay.getMetodo() == PaymentMethod.DEBITO)
             && (pay.getNumeroCartao() == null || pay.getNumeroCartao().isBlank())) {
             throw new RuntimeException("Número do cartão obrigatório para pagamento com cartão");
         }
 
-        pay.setStatus(PaymentStatus.PENDENTE_PROCESSAMENTO);
         return repository.save(pay);
     }
 
@@ -36,10 +54,20 @@ public class PaymentService {
     public Page<Payment> filterListPayments(
             BigInteger codigoDebito,
             String cpfCnpj,
-            PaymentStatus status,
+            String status,
             Pageable pageable
     ) {
-        return repository.findByFilters(codigoDebito, cpfCnpj, status, pageable);
+        PaymentStatus st = null;
+
+        if (status != null && !status.isBlank()) {
+            try {
+                st = PaymentStatus.valueOf(status.toUpperCase());
+            } catch (IllegalArgumentException e) {
+                throw new BusinessException("Status de pagamento inválido: " + status);
+            }
+        }
+
+        return repository.findByFilters(codigoDebito, cpfCnpj, st, pageable);
     }
 
     @Transactional
@@ -72,7 +100,7 @@ public class PaymentService {
     }
 
     @Transactional
-    public void deletePay(Long id) {
+    public DeletePaymentResponseDTO deletePay(Long id) {
         Payment existing = repository.findById(id).orElseThrow(() -> new  BusinessException("Pagamento não encontrado"));
 
         if(existing.getStatus() != PaymentStatus.PENDENTE_PROCESSAMENTO) {
@@ -81,5 +109,7 @@ public class PaymentService {
 
         existing.setStatus(PaymentStatus.INATIVO);
         repository.save(existing);
+
+        return new DeletePaymentResponseDTO(200, "Pagamento desativado !!", LocalDateTime.now());
     }
 }

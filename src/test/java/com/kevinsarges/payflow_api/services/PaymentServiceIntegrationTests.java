@@ -1,5 +1,6 @@
 package com.kevinsarges.payflow_api.services;
 
+import com.kevinsarges.payflow_api.DTOs.PaymentRequestDTO;
 import com.kevinsarges.payflow_api.entities.Payment;
 import com.kevinsarges.payflow_api.entities.PaymentMethod;
 import com.kevinsarges.payflow_api.entities.PaymentStatus;
@@ -35,45 +36,45 @@ class PaymentServiceIntegrationTests {
     @Autowired
     private PaymentService service;
 
-    private Payment pagamentoPix;
-    private Payment pagamentoBoleto;
-    private Payment pagamentoDebito;
-    private Payment pagamentoCredito;
+    private PaymentRequestDTO pagamentoPix;
+    private PaymentRequestDTO pagamentoBoleto;
+    private PaymentRequestDTO pagamentoDebito;
+    private PaymentRequestDTO pagamentoCredito;
 
     @BeforeEach
     void setupPix() {
-        pagamentoPix = new Payment();
+        pagamentoPix = new PaymentRequestDTO();
         pagamentoPix.setCodigoDebito(BigInteger.ONE);
         pagamentoPix.setCpfCnpj("12345678900");
-        pagamentoPix.setMetodo(PaymentMethod.PIX);
+        pagamentoPix.setMetodo("PIX");
         pagamentoPix.setValor(BigDecimal.valueOf(100.0));
     }
 
     @BeforeEach
     void setupBoleto() {
-        pagamentoBoleto = new Payment();
+        pagamentoBoleto = new PaymentRequestDTO();
         pagamentoBoleto.setCodigoDebito(BigInteger.ONE);
         pagamentoBoleto.setCpfCnpj("12345678900");
-        pagamentoBoleto.setMetodo(PaymentMethod.BOLETO);
+        pagamentoBoleto.setMetodo("BOLETO");
         pagamentoBoleto.setValor(BigDecimal.valueOf(100.0));
     }
 
     @BeforeEach
     void setupDebito() {
-        pagamentoDebito = new Payment();
+        pagamentoDebito = new PaymentRequestDTO();
         pagamentoDebito.setCodigoDebito(BigInteger.ONE);
         pagamentoDebito.setCpfCnpj("12345678900");
-        pagamentoDebito.setMetodo(PaymentMethod.DEBITO);
+        pagamentoDebito.setMetodo("DEBITO");
         pagamentoDebito.setValor(BigDecimal.valueOf(100.0));
         pagamentoDebito.setNumeroCartao("999999999999");
     }
 
     @BeforeEach
     void setupCredito() {
-        pagamentoCredito = new Payment();
+        pagamentoCredito = new PaymentRequestDTO();
         pagamentoCredito.setCodigoDebito(BigInteger.ONE);
         pagamentoCredito.setCpfCnpj("12345678900");
-        pagamentoCredito.setMetodo(PaymentMethod.CREDITO);
+        pagamentoCredito.setMetodo("CREDITO");
         pagamentoCredito.setValor(BigDecimal.valueOf(100.0));
         pagamentoCredito.setNumeroCartao("999999999999");
     }
@@ -129,7 +130,7 @@ class PaymentServiceIntegrationTests {
     @Test
     @DisplayName("Deve lançar exceção quando número do cartão for obrigatório mas não informado")
     void deveLancarExcecaoQuandoCartaoSemNumero() {
-        pagamentoPix.setMetodo(PaymentMethod.CREDITO);
+        pagamentoPix.setMetodo("CREDITO");
         pagamentoPix.setNumeroCartao(null);
 
         RuntimeException ex = assertThrows(RuntimeException.class,
@@ -237,7 +238,7 @@ class PaymentServiceIntegrationTests {
     @Test
     @DisplayName("Deve retornar lista vazia se filtro não encontrar resultados")
     void deveRetornarListaVaziaSeNenhumPagamentoEncontradoNoFiltro() {
-        Page<Payment> result = service.filterListPayments(BigInteger.TEN, null, PaymentStatus.INATIVO, PageRequest.of(0, 10));
+        Page<Payment> result = service.filterListPayments(BigInteger.TEN, null, "INATIVO", PageRequest.of(0, 10));
 
         assertTrue(result.isEmpty());
     }

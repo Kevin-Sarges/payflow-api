@@ -42,14 +42,7 @@ public class PaymentController {
             @ApiResponse(responseCode = "500", description = "Erro interno no servidor")
     })
     public ResponseEntity<Payment> create(@Valid @RequestBody PaymentRequestDTO dto) {
-        Payment pay = Payment.builder()
-                .codigoDebito(dto.getCodigoDebito())
-                .cpfCnpj(dto.getCpfCnpj())
-                .metodo(PaymentMethod.valueOf(dto.getMetodo().toUpperCase()))
-                .numeroCartao(dto.getNumeroCartao())
-                .valor(dto.getValor())
-                .build();
-        Payment saved = service.create(pay);
+        Payment saved = service.create(dto);
         return ResponseEntity.ok(saved);
     }
 
@@ -84,12 +77,7 @@ public class PaymentController {
             @ApiResponse(responseCode = "500", description = "Erro interno no servidor")
     })
     public ResponseEntity<Page<Payment>> filterListPayments(Pageable pageable, @Valid @RequestBody FilterPaymentRequestDTO dto) {
-        PaymentStatus st = null;
-        if (dto.getStatus() != null) {
-            st = PaymentStatus.valueOf(dto.getStatus().toUpperCase());
-        }
-
-        Page<Payment> result = service.filterListPayments(dto.getCodigoDebito(), dto.getCpfCnpj(), st, pageable);
+        Page<Payment> result = service.filterListPayments(dto.getCodigoDebito(), dto.getCpfCnpj(), dto.getStatus(), pageable);
         return ResponseEntity.ok(result);
     }
 
@@ -123,11 +111,7 @@ public class PaymentController {
             @ApiResponse(responseCode = "500", description = "Erro interno no servidor")
     })
     public ResponseEntity<?> delete(@PathVariable Long id) {
-        service.deletePay(id);
-        return ResponseEntity.ok(new DeletePaymentResponseDTO(
-                200,
-                "Pagamento desativado !!",
-                LocalDateTime.now())
-        );
+        DeletePaymentResponseDTO response = service.deletePay(id);
+        return ResponseEntity.ok(response);
     }
 }

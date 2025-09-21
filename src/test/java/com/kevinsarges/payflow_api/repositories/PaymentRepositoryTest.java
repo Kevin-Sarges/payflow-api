@@ -24,14 +24,14 @@ public class PaymentRepositoryTest {
     private PaymentRepository repository;
 
     private Payment criarPagamento(BigInteger codigoDebito, String cpfCnpj, PaymentStatus status, PaymentMethod metodo) {
-        Payment p = new Payment();
-        p.setCodigoDebito(codigoDebito);
-        p.setCpfCnpj(cpfCnpj);
-        p.setMetodo(metodo);
-        p.setNumeroCartao(metodo == PaymentMethod.PIX ? null : "4111111111111111");
-        p.setValor(BigDecimal.valueOf(100.0));
-        p.setStatus(status);
-        return p;
+        Payment pay = new Payment();
+        pay.setCodigoDebito(codigoDebito);
+        pay.setCpfCnpj(cpfCnpj);
+        pay.setMetodo(metodo);
+        pay.setNumeroCartao(metodo == PaymentMethod.PIX ? null : "4111111111111111");
+        pay.setValor(BigDecimal.valueOf(100.0));
+        pay.setStatus(status);
+        return pay;
     }
 
     @Test

@@ -1,6 +1,7 @@
 package com.kevinsarges.payflow_api.services;
 
 
+import com.kevinsarges.payflow_api.DTOs.PaymentRequestDTO;
 import com.kevinsarges.payflow_api.entities.Payment;
 import com.kevinsarges.payflow_api.entities.PaymentMethod;
 import com.kevinsarges.payflow_api.entities.PaymentStatus;
@@ -34,6 +35,11 @@ public class PaymentServiceUnitTests {
     @InjectMocks
     private PaymentService service;
 
+    private PaymentRequestDTO dtoPix;
+    private PaymentRequestDTO dtoBoleto;
+    private PaymentRequestDTO dtoDebito;
+    private PaymentRequestDTO dtoCredito;
+
     private Payment pagamentoPix;
     private Payment pagamentoBoleto;
     private Payment pagamentoDebito;
@@ -41,43 +47,69 @@ public class PaymentServiceUnitTests {
 
     @BeforeEach
     void setupPix() {
+        dtoPix = new PaymentRequestDTO();
+        dtoPix.setCodigoDebito(BigInteger.ONE);
+        dtoPix.setCpfCnpj("12345678900");
+        dtoPix.setMetodo("PIX");
+        dtoPix.setValor(BigDecimal.valueOf(100.0));
+
         pagamentoPix = new Payment();
-        pagamentoPix.setCodigoDebito(BigInteger.ONE);
-        pagamentoPix.setCpfCnpj("12345678900");
+        pagamentoPix.setCodigoDebito(dtoPix.getCodigoDebito());
+        pagamentoPix.setCpfCnpj(dtoPix.getCpfCnpj());
         pagamentoPix.setMetodo(PaymentMethod.PIX);
-        pagamentoPix.setValor(BigDecimal.valueOf(100.0));
+        pagamentoPix.setValor(dtoPix.getValor());
         pagamentoPix.setStatus(PaymentStatus.PENDENTE_PROCESSAMENTO);
     }
 
     @BeforeEach
     void setupBoleto() {
+        dtoBoleto = new PaymentRequestDTO();
+        dtoBoleto.setCodigoDebito(BigInteger.ONE);
+        dtoBoleto.setCpfCnpj("12345678900");
+        dtoBoleto.setMetodo("BOLETO");
+        dtoBoleto.setValor(BigDecimal.valueOf(200.0));
+
         pagamentoBoleto = new Payment();
-        pagamentoBoleto.setCodigoDebito(BigInteger.ONE);
-        pagamentoBoleto.setCpfCnpj("12345678900");
-        pagamentoBoleto.setMetodo(PaymentMethod.PIX);
-        pagamentoBoleto.setValor(BigDecimal.valueOf(100.0));
+        pagamentoBoleto.setCodigoDebito(dtoBoleto.getCodigoDebito());
+        pagamentoBoleto.setCpfCnpj(dtoBoleto.getCpfCnpj());
+        pagamentoBoleto.setMetodo(PaymentMethod.BOLETO);
+        pagamentoBoleto.setValor(dtoBoleto.getValor());
         pagamentoBoleto.setStatus(PaymentStatus.PENDENTE_PROCESSAMENTO);
     }
 
     @BeforeEach
     void setupDebito() {
+        dtoDebito = new PaymentRequestDTO();
+        dtoDebito.setCodigoDebito(BigInteger.ONE);
+        dtoDebito.setCpfCnpj("12345678900");
+        dtoDebito.setMetodo("DEBITO");
+        dtoDebito.setValor(BigDecimal.valueOf(100.0));
+        dtoDebito.setNumeroCartao("44444444444444");
+
         pagamentoDebito = new Payment();
-        pagamentoDebito.setCodigoDebito(BigInteger.ONE);
-        pagamentoDebito.setCpfCnpj("12345678900");
-        pagamentoDebito.setMetodo(PaymentMethod.PIX);
-        pagamentoDebito.setValor(BigDecimal.valueOf(100.0));
-        pagamentoDebito.setNumeroCartao("44444444444444");
+        pagamentoDebito.setCodigoDebito(dtoDebito.getCodigoDebito());
+        pagamentoDebito.setCpfCnpj(dtoDebito.getCpfCnpj());
+        pagamentoDebito.setMetodo(PaymentMethod.DEBITO);
+        pagamentoDebito.setNumeroCartao(dtoDebito.getNumeroCartao());
+        pagamentoDebito.setValor(dtoDebito.getValor());
         pagamentoDebito.setStatus(PaymentStatus.PENDENTE_PROCESSAMENTO);
     }
 
     @BeforeEach
     void setupCredito() {
+        dtoCredito = new PaymentRequestDTO();
+        dtoCredito.setCodigoDebito(BigInteger.ONE);
+        dtoCredito.setCpfCnpj("12345678900");
+        dtoCredito.setMetodo("CREDITO");
+        dtoCredito.setNumeroCartao("5555444433332222");
+        dtoCredito.setValor(BigDecimal.valueOf(300.0));
+
         pagamentoCredito = new Payment();
-        pagamentoCredito.setCodigoDebito(BigInteger.ONE);
-        pagamentoCredito.setCpfCnpj("12345678900");
-        pagamentoCredito.setMetodo(PaymentMethod.PIX);
-        pagamentoCredito.setValor(BigDecimal.valueOf(100.0));
-        pagamentoDebito.setNumeroCartao("44444444444444");
+        pagamentoCredito.setCodigoDebito(dtoCredito.getCodigoDebito());
+        pagamentoCredito.setCpfCnpj(dtoCredito.getCpfCnpj());
+        pagamentoCredito.setMetodo(PaymentMethod.CREDITO);
+        pagamentoCredito.setNumeroCartao(dtoCredito.getNumeroCartao());
+        pagamentoCredito.setValor(dtoCredito.getValor());
         pagamentoCredito.setStatus(PaymentStatus.PENDENTE_PROCESSAMENTO);
     }
 
@@ -86,7 +118,7 @@ public class PaymentServiceUnitTests {
     void deveCriarPagamentoComPix() {
         when(repository.save(any(Payment.class))).thenReturn(pagamentoPix);
 
-        Payment result = service.create(pagamentoPix);
+        Payment result = service.create(dtoPix);
 
         assertNotNull(result);
         assertEquals(PaymentStatus.PENDENTE_PROCESSAMENTO, result.getStatus());
@@ -98,7 +130,7 @@ public class PaymentServiceUnitTests {
     void deveCriarPagamentoComBoleto() {
         when(repository.save(any(Payment.class))).thenReturn(pagamentoBoleto);
 
-        Payment result = service.create(pagamentoBoleto);
+        Payment result = service.create(dtoBoleto);
 
         assertNotNull(result);
         assertEquals(PaymentStatus.PENDENTE_PROCESSAMENTO, result.getStatus());
@@ -110,7 +142,7 @@ public class PaymentServiceUnitTests {
     void deveCriarPagamentoComDebito() {
         when(repository.save(any(Payment.class))).thenReturn(pagamentoDebito);
 
-        Payment result = service.create(pagamentoDebito);
+        Payment result = service.create(dtoDebito);
 
         assertNotNull(result);
         assertEquals(PaymentStatus.PENDENTE_PROCESSAMENTO, result.getStatus());
@@ -122,7 +154,7 @@ public class PaymentServiceUnitTests {
     void deveCriarPagamentoComCredito() {
         when(repository.save(any(Payment.class))).thenReturn(pagamentoCredito);
 
-        Payment result = service.create(pagamentoCredito);
+        Payment result = service.create(dtoCredito);
 
         assertNotNull(result);
         assertEquals(PaymentStatus.PENDENTE_PROCESSAMENTO, result.getStatus());
@@ -132,10 +164,10 @@ public class PaymentServiceUnitTests {
     @Test
     @DisplayName("Deve lançar uma exceção quando o numero do cartão não existir caso o método for debito ou crédito")
     void deveLancarExcecaoQuandoCartaoSemNumero() {
-        pagamentoPix.setMetodo(PaymentMethod.CREDITO);
-        pagamentoPix.setNumeroCartao(null);
+        dtoPix.setMetodo("CREDITO");
+        dtoPix.setNumeroCartao(null);
 
-        RuntimeException ex = assertThrows(RuntimeException.class, () -> service.create(pagamentoPix));
+        RuntimeException ex = assertThrows(RuntimeException.class, () -> service.create(dtoPix));
 
         assertEquals("Número do cartão obrigatório para pagamento com cartão", ex.getMessage());
         verify(repository, never()).save(any());
@@ -261,7 +293,7 @@ public class PaymentServiceUnitTests {
         when(repository.findByFilters(BigInteger.TEN, null, PaymentStatus.INATIVO, pageable))
                 .thenReturn(Page.empty());
 
-        Page<Payment> result = service.filterListPayments(BigInteger.TEN, null, PaymentStatus.INATIVO, pageable);
+        Page<Payment> result = service.filterListPayments(BigInteger.TEN, null, "INATIVO", pageable);
 
         assertTrue(result.isEmpty());
         verify(repository, times(1)).findByFilters(BigInteger.TEN, null, PaymentStatus.INATIVO, pageable);
